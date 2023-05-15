@@ -4,7 +4,7 @@ use chrono::Timelike;
 
 fn main() {
     let now = chrono::offset::Utc::now();
-    let m = 15;//now.minute();
+    let m = now.minute();
     let h = now.hour();
     let mut lang = "en".to_owned();
     let mut new_line = false;
@@ -22,10 +22,13 @@ fn main() {
 fn get_time(h:u32,m:u32,lan:String, nl:bool) -> String{
     let l = lan.as_str();
     let (hours, mins) = get_language(l);
-    let mut h_ind = ((h%12)) as usize;
+    let mut h_ind = (h%12) as usize;
 	let m_ind = ((m) as f32 /6.67) as usize;
-	if m_ind > 4{
+    if m_ind > 4{
 		h_ind = (h_ind)%12 + 1;
+        if h == 23{
+            h_ind = 0;
+        }
 	}
     let mut ht = hours[h_ind].to_owned();
     if h_ind == 0 && (h == 11 || h == 12){
