@@ -3,7 +3,7 @@ use std::env;
 use chrono::Timelike;
 
 fn main() {
-    let now = chrono::offset::Utc::now();
+    let now = chrono::offset::Local::now();
     let m = now.minute();
     let h = now.hour();
     let mut lang = "en".to_owned();
