@@ -16,7 +16,7 @@ fn main() {
             new_line = true
         }
     }
-    println!("{}",get_time(h, m, lang, new_line));
+    println!("{}",gt_time(h, m, lang, new_line));
 }
 
 fn get_time(h:u32,m:u32,lan:String, nl:bool) -> String{
