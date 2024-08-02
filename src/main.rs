@@ -69,7 +69,6 @@ impl Time {
 fn main() {
     let now = chrono::offset::Local::now();
     let time = Time{h: now.hour() as u64, m: now.minute() as f64};
-//    let time = Time{h: now.hour() as u64, m: 30 as f64};
     let new_line = match env::args().find(|x| x == "t"){
         Some(_) => true,
         None => false
