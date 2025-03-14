@@ -1,10 +1,10 @@
-use std::env;
+use std::{collections::HashMap, env};
 
 use chrono::Timelike;
 
 struct Time {
-    h:u64, 
-    m:f64,
+    h:u32, 
+    m:f32,
 }
 
 impl Time {
@@ -12,22 +12,21 @@ impl Time {
         let (hours, mins) = Self::get_language(lan);
         let (h_ind, m_ind) = self.get_indexes(); 
 
-        let mut ht = if h_ind == 0 && (self.h == 11 || self.h == 12){
-            hours[12].to_owned()
+        let hours_text = if h_ind == 0 && (self.h == 11 || self.h == 12){
+            hours[12]
         } else {
-            hours[h_ind].to_owned()
+            hours[h_ind]
         };
 
-        let mut mt = mins[m_ind].to_owned();
+        let mins_text = mins[m_ind];
         if m_ind == 0{
-            return format!("{ht}").to_owned();
+            return format!("{hours_text}");
         }
 
-        let separator = if nl {(ht,mt) = Self::update_text(ht,mt); "\n"} else {" "};
-        return match lan {
-            "it" => {format!("{ht}{separator}{mt}").to_owned()}
-            "en"|_ => format!("{mt}{separator}{ht}").to_owned(),
-        };
+        match lan {
+            "it" => format_text(hours_text, mins_text, nl),
+            "en"|_ => format_text(mins_text, hours_text, nl),
+        }
     }
 
     fn get_indexes(&self) -> (usize, usize){
@@ -41,42 +40,53 @@ impl Time {
         } else {
             (self.h%12) as usize
         };
-        return (h_ind, m_ind);
+        (h_ind, m_ind)
     }
 
-    fn update_text(ht:String, mt:String) -> (String, String) {
-        let hl = ht.len() as isize;
-        let ml = mt.len() as isize;
-        
-        let diff = (isize::abs(hl - ml)/2) as usize;
-        let offset = " ".repeat(diff);
-        return if hl > ml {(ht, offset + &mt)} else {(offset + &ht, mt)}
+    fn get_language(lan:&str) -> ([&str;13],[&str;12]){
+        let languages = HashMap::from([
+            ("en",(
+                ["midnight","one","two","three","four","five","six","seven","eight","nine", "ten", "eleven", "noon"],
+                ["", "five past", "ten past", "quarter past", "twenty past", "twenty-five past", "half past", "twenty-five to", "twenty to", "quarter to", "ten to", "five to"])),
+            ("it", (
+                ["mezzanotte","l'una","le due", "le tre", "le quattro", "le cinque", "le sei", "le sette", "le otto", "le nove", "le dieci", "le undici", "mezzogiorno"],
+                ["", "e cinque", "e dieci", "e un quarto", "e venti", "e venticinque", "e mezza", "meno venticinque", "meno venti", "meno un quarto", "meno dieci", "meno cinque"])),
+        ]);
+        languages[lan]
+    }
+}
+
+fn format_text(first:&str, second:&str, new_line: bool) -> String {
+
+    if !new_line {
+        return format!("{}{}{}", first, " ", &second)
     }
 
-    fn get_language(lan:&str) -> ([&'static str;13],[&'static str;12]){
-        let hours_en = ["midnight","one","two","three","four","five","six","seven","eight","nine", "ten", "eleven", "noon"];
-        let mins_en = ["", "five past", "ten past", "quarter past", "twenty past", "twenty-five past", "half past", "twenty-five to", "twenty to", "quarter to", "ten to", "five to"];
-        let hours_it = ["mezzanotte","l'una","le due", "le tre", "le quattro", "le cinque", "le sei", "le sette", "le otto", "le nove", "le dieci", "le undici", "mezzogiorno"];
-        let mins_it = ["", "e cinque", "e dieci", "e un quarto", "e venti", "e venticinque", "e mezza", "meno venticinque", "meno venti", "meno un quarto", "meno dieci", "meno cinque"];
-        let (hours, mins) = match lan{
-            "it" => (hours_it, mins_it),
-            "en"|_ => (hours_en, mins_en),
-        };
-        return (hours, mins);
+    let len_first = first.len() as isize;
+    let len_second = second.len() as isize;
+    
+    let diff = (isize::abs(len_first - len_second)/2) as usize;
+    let offset = " ".repeat(diff);
+    if len_first > len_second {
+        format!("{}{}{}", first, "\n", offset + &second)
+    } 
+    else {
+        format!("{}{}{}", offset + &first, "\n", &second)
     }
 }
 
 fn main() {
     let now = chrono::offset::Local::now();
-    let time = Time{h: now.hour() as u64, m: now.minute() as f64};
+    let time = Time{h: now.hour(), m: now.minute() as f32};
     let new_line = match env::args().find(|x| x == "t"){
         Some(_) => true,
         None => false
     };
-    let lang = match env::args().find(|x| x == "it" || x == "en"){
+    let available_languages = ["it", "en"];
+    let lang = match env::args().find(|x| available_languages.contains(&(x.as_str()))) {
         Some(t) => t,
         None => "en".to_string()
     };
-    println!("{}",time.get_time_string(&lang, new_line));
+    println!("{}", time.get_time_string(&lang, new_line));
 }
 
