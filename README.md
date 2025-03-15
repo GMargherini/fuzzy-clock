@@ -2,7 +2,11 @@
 Tells the local time with a precision of ±2.5 minutes
 
 ## Build
- ```cargo build```
+ ```cargo build [--release]```
 
 ## Usage
-```cargo run [en|it] [t]```
+```./fuzzy_clock [language] [t]```
+
+### Available languages
+- English -> en
+- Italian -> it
