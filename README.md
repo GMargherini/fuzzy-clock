@@ -9,4 +9,7 @@ Tells the local time with a precision of ±2.5 minutes
 
 ### Available languages
 - English -> en
+- French -> fr
 - Italian -> it
+- Swedish -> sv
+
