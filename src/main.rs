@@ -1,10 +1,14 @@
 mod clock {
     use chrono::Timelike;
     use std::cmp::Ordering;
-    use std::collections::HashMap;
     pub struct Time {
         h: u32,
         m: f32,
+    }
+
+    pub enum Language {
+        It,
+        En
     }
 
     impl Time {
@@ -16,8 +20,8 @@ mod clock {
             }
         }
 
-        pub fn get_time_string(&self, lan: &str, nl: bool) -> String {
-            let (hours, mins) = Self::get_language(lan);
+        pub fn get_time_string(&self, lang: &Language, nl: bool) -> String {
+            let (hours, mins) = Self::get_language(lang);
             let (h_ind, m_ind) = self.get_indexes();
 
             let hours = if h_ind == 0 && (self.h == 11 || self.h == 12) {
@@ -31,9 +35,9 @@ mod clock {
                 return hours.to_string();
             }
 
-            match lan {
-                "it" => format_text(hours, mins, nl),
-                _ => format_text(mins, hours, nl),
+            match lang {
+                Language::It => format_text(hours, mins, nl),
+                Language::En => format_text(mins, hours, nl),
             }
         }
 
@@ -51,67 +55,60 @@ mod clock {
             (h_ind, m_ind)
         }
 
-        fn get_language(lan: &str) -> ([&str; 13], [&str; 12]) {
-            let languages = HashMap::from([
-                (
-                    "en",
-                    (
-                        [
-                            "midnight", "one", "two", "three", "four", "five", "six", "seven", "eight",
-                            "nine", "ten", "eleven", "noon",
-                        ],
-                        [
-                            "",
-                            "five past",
-                            "ten past",
-                            "quarter past",
-                            "twenty past",
-                            "twenty-five past",
-                            "half past",
-                            "twenty-five to",
-                            "twenty to",
-                            "quarter to",
-                            "ten to",
-                            "five to",
-                        ],
-                    ),
+        fn get_language(lang: &Language) -> ([&str; 13], [&str; 12]) {
+            match lang {
+                Language::En => (
+                    [
+                        "midnight", "one", "two", "three", "four", "five", "six", "seven", "eight",
+                        "nine", "ten", "eleven", "noon",
+                    ],
+                    [
+                        "",
+                        "five past",
+                        "ten past",
+                        "quarter past",
+                        "twenty past",
+                        "twenty-five past",
+                        "half past",
+                        "twenty-five to",
+                        "twenty to",
+                        "quarter to",
+                        "ten to",
+                        "five to",
+                    ],
                 ),
-                (
-                    "it",
-                    (
-                        [
-                            "mezzanotte",
-                            "l'una",
-                            "le due",
-                            "le tre",
-                            "le quattro",
-                            "le cinque",
-                            "le sei",
-                            "le sette",
-                            "le otto",
-                            "le nove",
-                            "le dieci",
-                            "le undici",
-                            "mezzogiorno",
-                        ],
-                        [
-                            "",
-                            "e cinque",
-                            "e dieci",
-                            "e un quarto",
-                            "e venti",
-                            "e venticinque",
-                            "e mezza",
-                            "meno venticinque",
-                            "meno venti",
-                            "meno un quarto",
-                            "meno dieci",
-                            "meno cinque",
-                        ],
-                    ),
-                ),
-            ]);
-            languages[lan]
+                Language::It => (
+                    [
+                        "mezzanotte",
+                        "l'una",
+                        "le due",
+                        "le tre",
+                        "le quattro",
+                        "le cinque",
+                        "le sei",
+                        "le sette",
+                        "le otto",
+                        "le nove",
+                        "le dieci",
+                        "le undici",
+                        "mezzogiorno",
+                    ],
+                    [
+                        "",
+                        "e cinque",
+                        "e dieci",
+                        "e un quarto",
+                        "e venti",
+                        "e venticinque",
+                        "e mezza",
+                        "meno venticinque",
+                        "meno venti",
+                        "meno un quarto",
+                        "meno dieci",
+                        "meno cinque",
+                    ],
+                )
+            }
         }
     }
 
@@ -136,14 +133,17 @@ mod clock {
 }
 
 use std:: env;
-use clock::Time;
+use clock::{Language, Time};
 fn main() {
     let time = Time::new();
     let new_line = env::args().any(|x| x == "t");
-    let available_languages = ["it", "en"];
-    let lang = match env::args().find(|x| available_languages.contains(&(x.as_str()))) {
-        Some(t) => t,
-        None => "en".to_string(),
+    let lang = match env::args().find(|x| x.len() == 2) {
+        Some(l) => match &l[..] {
+            "it" => Language::It,
+            "en" => Language::En,
+            _ => panic!("language not available")
+        },
+        None => Language::En,
     };
     println!("{}", time.get_time_string(&lang, new_line));
 }
