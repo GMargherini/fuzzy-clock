@@ -1,8 +1,12 @@
 use chrono::Timelike;
 use std::cmp::Ordering;
+use std::fmt::{Display, Error, Formatter};
+
 pub struct Time {
     h: u32,
     m: f32,
+    lang: Language,
+    newline: bool,
 }
 
 pub enum Language {
@@ -11,32 +15,25 @@ pub enum Language {
 }
 
 impl Time {
-    pub fn new() -> Time {
+    pub fn new(lang: &str, newline: bool) -> Time {
         let now = chrono::offset::Local::now();
         Time {
             h: now.hour(),
             m: now.minute() as f32,
+            lang: Language::new(lang),
+            newline,
         }
     }
 
-    pub fn get_time_string(&self, lang: &Language, nl: bool) -> String {
-        let (hours, mins) = Self::get_language(lang);
+    fn get_time_string(&self) -> String {
+        let (hours, mins) = self.get_dictionary();
         let (h_ind, m_ind) = self.get_indexes();
 
-        let hours = if h_ind == 0 && (self.h == 11 || self.h == 12) {
-            hours[12]
-        } else {
-            hours[h_ind]
-        };
+        let (hours, mins) = (hours[h_ind], mins[m_ind]);
 
-        let mins = mins[m_ind];
-        if m_ind == 0 {
-            return hours.to_string();
-        }
-
-        match lang {
-            Language::It => format_text(hours, mins, nl),
-            Language::En => format_text(mins, hours, nl),
+        match self.lang {
+            Language::It => self.format_text(hours, mins),
+            Language::En => self.format_text(mins, hours),
         }
     }
 
@@ -51,11 +48,39 @@ impl Time {
         } else {
             (self.h % 12) as usize
         };
+
+        let h_ind = if h_ind == 0 && (self.h == 11 || self.h == 12) {
+            12
+        } else {
+            h_ind
+        };
         (h_ind, m_ind)
     }
 
-    fn get_language(lang: &Language) -> ([&str; 13], [&str; 12]) {
-        match lang {
+    fn format_text(&self, first: &str, second: &str) -> String {
+        match (first, second) {
+            ("", x) | (x, "") => return x.to_string(),
+            _ => (),
+        };
+        if !self.newline {
+            return format!("{} {}", first, second);
+        }
+
+        let len_first = first.len() as isize;
+        let len_second = second.len() as isize;
+
+        let diff = (isize::abs(len_first - len_second) / 2) as usize;
+        let offset = " ".repeat(diff);
+
+        match len_first.cmp(&len_second) {
+            Ordering::Less => format!("{offset}{first}\n{second}"),
+            Ordering::Greater => format!("{first}\n{offset}{second}"),
+            Ordering::Equal => format!("{first}\n{second}"),
+        }
+    }
+
+    fn get_dictionary(&self) -> ([&str; 13], [&str; 12]) {
+        match self.lang {
             Language::En => (
                 [
                     "midnight", "one", "two", "three", "four", "five", "six", "seven", "eight",
@@ -111,20 +136,20 @@ impl Time {
     }
 }
 
-fn format_text(first: &str, second: &str, new_line: bool) -> String {
-    if !new_line {
-        return format!("{} {}", first, second);
+impl Display for Time {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+        write!(f, "{}", self.get_time_string())
     }
+}
 
-    let len_first = first.len() as isize;
-    let len_second = second.len() as isize;
-
-    let diff = (isize::abs(len_first - len_second) / 2) as usize;
-    let offset = " ".repeat(diff);
-
-    match len_first.cmp(&len_second) {
-        Ordering::Less => format!("{}\n{}", offset + first, second),
-        Ordering::Greater => format!("{}\n{}", first, offset + second),
-        Ordering::Equal => format!("{}\n{}", first, second),
+impl Language {
+    fn new(lang: &str) -> Language {
+        match lang {
+            "it" => Language::It,
+            "en" => Language::En,
+            l => {
+                panic!("language \"{l}\" not available");
+            }
+        }
     }
 }
