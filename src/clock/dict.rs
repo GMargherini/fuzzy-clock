@@ -1,4 +1,5 @@
 use super::Language;
+use super::Indexes;
 pub struct Dictionary<'a> {
     hours: [&'a str; 13],
     mins: [&'a str; 12],
@@ -60,7 +61,7 @@ impl<'a> Dictionary<'a> {
         }
     }
 
-    pub fn get_text(&self, h_ind: usize, m_ind: usize) -> (&str, &str) {
-        (self.hours[h_ind], self.mins[m_ind])
+    pub fn text(&self, indexes: &Indexes) -> (&str, &str) {
+        (self.hours[indexes.hour], self.mins[indexes.min])
     }
 }

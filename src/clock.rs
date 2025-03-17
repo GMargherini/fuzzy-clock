@@ -2,6 +2,7 @@ mod dict;
 mod lang;
 
 use dict::Dictionary;
+use super::Input;
 use lang::Language;
 use chrono::Timelike;
 use std::cmp::Ordering;
@@ -13,47 +14,32 @@ pub struct Time {
     newline: bool,
 }
 
+struct Indexes {
+    hour: usize,
+    min: usize
+}
+
 impl Time {
-    pub fn new(lang: &str, newline: bool) -> Result<Time, String> {
+    pub fn build(input: Input) -> Result<Time, String> {
         let now = chrono::offset::Local::now();
         Ok(Time {
             h: now.hour(),
             m: now.minute(),
-            lang: Language::new(lang)?,
-            newline,
+            lang: Language::build(input.lang())?,
+            newline: input.newline(),
         })
     }
 
     fn get_time_string(&self) -> String {
         let dict = Dictionary::new(&self.lang);
-        let (h_ind, m_ind) = self.get_indexes();
+        let indexes = Indexes::new(self.h, self.m);
 
-        let (hours, mins) = dict.get_text(h_ind, m_ind);
+        let (hours, mins) = dict.text(&indexes);
 
         match self.lang {
             Language::It | Language::Fr => self.format_text(hours, mins),
             Language::En | Language::Sv => self.format_text(mins, hours),
         }
-    }
-
-    fn get_indexes(&self) -> (usize, usize) {
-        let m_ind = (((self.m as f64 + 2.5) / 5.0) as usize) % 12;
-        let h_ind = if self.m as f64 > 30.0 {
-            if self.h == 23 {
-                0
-            } else {
-                ((self.h % 12) as usize) % 12 + 1
-            }
-        } else {
-            (self.h % 12) as usize
-        };
-
-        let h_ind = if h_ind == 0 && (self.h == 11 || self.h == 12) {
-            12
-        } else {
-            h_ind
-        };
-        (h_ind, m_ind)
     }
 
     fn format_text(&self, first: &str, second: &str) -> String {
@@ -82,5 +68,30 @@ impl Time {
 impl Display for Time {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
         write!(f, "{}", self.get_time_string())
+    }
+}
+
+impl Indexes {
+    fn new(h: u32, m: u32) -> Indexes {
+        let m_ind = (((m as f64 + 2.5) / 5.0) as usize) % 12;
+        let h_ind = if m as f64 > 30.0 {
+            if h == 23 {
+                0
+            } else {
+                ((h % 12) as usize) % 12 + 1
+            }
+        } else {
+            (h % 12) as usize
+        };
+
+        let h_ind = if h_ind == 0 && (h == 11 || h == 12) {
+            12
+        } else {
+            h_ind
+        };
+        Indexes {
+            hour: h_ind,
+            min: m_ind
+        }
     }
 }
