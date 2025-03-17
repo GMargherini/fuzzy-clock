@@ -11,6 +11,6 @@ fn main() {
     };
     match Time::new(&lang[..], newline) {
         Ok(t) => println!("{}", t),
-        Err(s) => println!("{s}")
+        Err(s) => eprintln!("{s}")
     };
 }
