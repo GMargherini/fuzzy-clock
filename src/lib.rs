@@ -53,7 +53,7 @@ pub fn print_help() {
 }
 
 pub fn run(input: Input) -> Result<(), String> {
-    match Time::build(input) {
+    match Time::build(input.lang(), input.newline()) {
         Ok(t) => {
             println!("{}", t);
             Ok(())
@@ -63,4 +63,69 @@ pub fn run(input: Input) -> Result<(), String> {
         }
     }
     
+}
+
+#[cfg(test)]
+mod tests {
+    use super::clock::{self, lang};
+
+    #[test]
+    fn language_is_valid() {
+        let lang = lang::Language::build("en");
+        assert!(lang.is_ok());
+        let lang = lang.unwrap();
+        assert_eq!(lang, lang::Language::En);
+    }
+
+    #[test]
+    fn language_is_not_valid() {
+        let lang = lang::Language::build("zh");
+        assert!(lang.is_err());
+    }
+
+    #[test]
+    fn midnight() {
+        let indexes = clock::Indexes::new(23, 59);
+        assert_eq!(indexes.hour(), 0);
+        assert_eq!(indexes.min(), 0);
+
+        let indexes = clock::Indexes::new(0, 0);
+        assert_eq!(indexes.hour(), 0);
+        assert_eq!(indexes.min(), 0);
+
+        let indexes = clock::Indexes::new(0, 1);
+        assert_eq!(indexes.hour(), 0);
+        assert_eq!(indexes.min(), 0);
+    }
+
+    #[test]
+    fn noon() {
+        let indexes = clock::Indexes::new(11, 59);
+        assert_eq!(indexes.hour(), 12);
+        assert_eq!(indexes.min(), 0);
+
+        let indexes = clock::Indexes::new(12, 0);
+        assert_eq!(indexes.hour(), 12);
+        assert_eq!(indexes.min(), 0);
+
+        let indexes = clock::Indexes::new(12, 1);
+        assert_eq!(indexes.hour(), 12);
+        assert_eq!(indexes.min(), 0);
+    }
+
+    #[test]
+    fn half() {
+        let indexes = clock::Indexes::new(1, 29);
+        assert_eq!(indexes.hour(), 1);
+        assert_eq!(indexes.min(), 6);
+
+        let indexes = clock::Indexes::new(1, 30);
+        assert_eq!(indexes.hour(), 1);
+        assert_eq!(indexes.min(), 6);
+
+        let indexes = clock::Indexes::new(1, 31);
+        assert_eq!(indexes.hour(), 1);
+        assert_eq!(indexes.min(), 6);
+    }
+
 }

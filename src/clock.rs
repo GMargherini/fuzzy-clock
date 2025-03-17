@@ -1,8 +1,7 @@
-mod dict;
-mod lang;
+pub mod dict;
+pub mod lang;
 
 use dict::Dictionary;
-use super::Input;
 use lang::Language;
 use chrono::Timelike;
 use std::cmp::Ordering;
@@ -14,19 +13,19 @@ pub struct Time {
     newline: bool,
 }
 
-struct Indexes {
+pub struct Indexes {
     hour: usize,
     min: usize
 }
 
 impl Time {
-    pub fn build(input: Input) -> Result<Time, String> {
+    pub fn build(lang: &str, newline: bool) -> Result<Time, String> {
         let now = chrono::offset::Local::now();
         Ok(Time {
             h: now.hour(),
             m: now.minute(),
-            lang: Language::build(input.lang())?,
-            newline: input.newline(),
+            lang: Language::build(lang)?,
+            newline,
         })
     }
 
@@ -34,7 +33,7 @@ impl Time {
         let dict = Dictionary::new(&self.lang);
         let indexes = Indexes::new(self.h, self.m);
 
-        let (hours, mins) = dict.text(&indexes);
+        let (hours, mins) = dict.text(indexes.hour(), indexes.min());
 
         match self.lang {
             Language::It | Language::Fr => self.format_text(hours, mins),
@@ -72,26 +71,37 @@ impl Display for Time {
 }
 
 impl Indexes {
-    fn new(h: u32, m: u32) -> Indexes {
+    pub fn new(h: u32, m: u32) -> Indexes {
         let m_ind = (((m as f64 + 2.5) / 5.0) as usize) % 12;
-        let h_ind = if m as f64 > 30.0 {
-            if h == 23 {
-                0
-            } else {
-                ((h % 12) as usize) % 12 + 1
-            }
-        } else {
-            (h % 12) as usize
+
+        let h_ind = match m.cmp(&32) {
+            Ordering::Less | Ordering::Equal => {
+                if h == 12{
+                    12
+                } else {
+                    (h % 12) as usize
+                }
+            },
+            Ordering::Greater => {
+                if h == 23 {
+                    0
+                } else {
+                    ((h % 13) + 1) as usize
+                }
+            },
         };
 
-        let h_ind = if h_ind == 0 && (h == 11 || h == 12) {
-            12
-        } else {
-            h_ind
-        };
         Indexes {
             hour: h_ind,
             min: m_ind
         }
+    }
+
+    pub fn hour(&self) -> usize {
+        self.hour
+    }
+
+    pub fn min(&self) -> usize {
+        self.min
     }
 }

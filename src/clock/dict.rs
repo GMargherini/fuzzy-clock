@@ -1,12 +1,11 @@
 use super::Language;
-use super::Indexes;
 pub struct Dictionary<'a> {
     hours: [&'a str; 13],
     mins: [&'a str; 12],
 }
 
 impl<'a> Dictionary<'a> {
-    pub fn new(lang: &Language) -> Dictionary<'a> {
+    pub fn new(lang: &Language) -> Dictionary {
         let (hours, mins) = match lang {
             Language::En => (
                 [
@@ -61,7 +60,7 @@ impl<'a> Dictionary<'a> {
         }
     }
 
-    pub fn text(&self, indexes: &Indexes) -> (&str, &str) {
-        (self.hours[indexes.hour], self.mins[indexes.min])
+    pub fn text(&self, hour: usize, min: usize) -> (&str, &str) {
+        (self.hours[hour], self.mins[min])
     }
 }
