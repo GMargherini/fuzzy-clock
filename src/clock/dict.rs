@@ -1,10 +1,37 @@
+use std::u32;
+
 use super::Language;
 pub struct Dictionary<'a> {
     hours: [&'a str; 13],
     mins: [&'a str; 12],
 }
 
-impl<'a> Dictionary<'a> {
+impl Dictionary<'_> {
+    fn get_mins_index(&self, mins: u32) -> usize {
+        let buckets: Vec<_> = (3..=53)
+            .step_by(5)
+            .map(|i| i..=i+4 )
+            .collect();
+        
+        match buckets.iter().enumerate().find(|(_, b)| b.contains(&mins)) {
+            Some((i, _)) => i+1,
+            None => 0
+        }
+    }
+
+    fn get_hours_index(&self, hours: u32, mins: u32) -> usize {
+        let h_ind = (hours % 12) as usize;
+        match mins {
+            33..=59 => match hours {
+                11 => 12,
+                23 => 0,
+                _ => h_ind + 1
+            },
+            _ => if hours == 12 {12} else {h_ind}
+        }
+    }
+
+
     pub fn new(lang: &Language) -> Dictionary {
         let (hours, mins) = match lang {
             Language::En => (
@@ -60,7 +87,9 @@ impl<'a> Dictionary<'a> {
         }
     }
 
-    pub fn text(&self, hour: usize, min: usize) -> (&str, &str) {
-        (self.hours[hour], self.mins[min])
+    pub fn text(&self, hour: u32, min: u32) -> (&str, &str) {
+        let mins = self.mins[self.get_mins_index(min)];
+        let hours = self.hours[self.get_hours_index(hour, min)];
+        (hours, mins)
     }
 }

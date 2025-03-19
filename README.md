@@ -1,12 +1,15 @@
 # Fuzzy clock
 Tells the local time with a precision of ±2.5 minutes
 
-## Usage
-```./fuzzy_clock [language] [t]```
+### Usage
+```
+fuzzy_clock [LANGUAGE] [t]
+fuzzy_clock help
+```
+Arguments can be specified in any order
 
 ### Available languages
-- English -> en
-- French -> fr
-- Italian -> it
-- Swedish -> sv
-
+- en: English (default)
+- fr: French
+- it: Italian
+- sv: Swedish
