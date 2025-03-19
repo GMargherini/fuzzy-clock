@@ -41,15 +41,17 @@ impl Input {
 }
 
 pub fn print_help() {
-    println!("Usage:\tfuzzy_clock [language] [t]\n\tfuzzy_clock [help]");
-    println!("Arguments can be specified in any order");
-    println!("\n\thelp\t:\tprint this help message");
-    println!("\tt\t:\toutput over two lines instead of one");
-    println!("\nlanguage:
-        en\t:\tEnglish (default)
-        fr\t:\tFrench
-        it\t:\tItalian
-        sv\t:\tSwedish");
+    println!(
+"Usage:\tfuzzy_clock [LANGUAGE] [t]\n\tfuzzy_clock help
+Arguments can be specified in any order\n
+    help\t:\tprint this help message
+    t\t\t:\toutput over two lines instead of one
+\nlanguage:
+    en\t\t:\tEnglish (default)
+    fr\t\t:\tFrench
+    it\t\t:\tItalian
+    sv\t\t:\tSwedish"
+    );
 }
 
 pub fn run(input: Input) -> Result<(), String> {
@@ -85,47 +87,50 @@ mod tests {
 
     #[test]
     fn midnight() {
-        let indexes = clock::Indexes::new(23, 59);
-        assert_eq!(indexes.hour(), 0);
-        assert_eq!(indexes.min(), 0);
+        let dictionary = clock::dict::Dictionary::new(&lang::Language::En);
+        let (hour, mins) = dictionary.text(23, 59);
+        assert_eq!(hour, "midnight");
+        assert_eq!(mins, "");
 
-        let indexes = clock::Indexes::new(0, 0);
-        assert_eq!(indexes.hour(), 0);
-        assert_eq!(indexes.min(), 0);
+        let (hour, mins) = dictionary.text(0, 0);
+        assert_eq!(hour, "midnight");
+        assert_eq!(mins, "");
 
-        let indexes = clock::Indexes::new(0, 1);
-        assert_eq!(indexes.hour(), 0);
-        assert_eq!(indexes.min(), 0);
+        let (hour, mins) = dictionary.text(0, 1);
+        assert_eq!(hour, "midnight");
+        assert_eq!(mins, "");
     }
 
     #[test]
     fn noon() {
-        let indexes = clock::Indexes::new(11, 59);
-        assert_eq!(indexes.hour(), 12);
-        assert_eq!(indexes.min(), 0);
+        let dictionary = clock::dict::Dictionary::new(&lang::Language::En);
+        let (hour, mins) = dictionary.text(11, 59);
+        assert_eq!(hour, "noon");
+        assert_eq!(mins, "");
 
-        let indexes = clock::Indexes::new(12, 0);
-        assert_eq!(indexes.hour(), 12);
-        assert_eq!(indexes.min(), 0);
+        let (hour, mins) = dictionary.text(12, 0);
+        assert_eq!(hour, "noon");
+        assert_eq!(mins, "");
 
-        let indexes = clock::Indexes::new(12, 1);
-        assert_eq!(indexes.hour(), 12);
-        assert_eq!(indexes.min(), 0);
+        let (hour, mins) = dictionary.text(12, 1);
+        assert_eq!(hour, "noon");
+        assert_eq!(mins, "");
     }
 
     #[test]
     fn half() {
-        let indexes = clock::Indexes::new(1, 29);
-        assert_eq!(indexes.hour(), 1);
-        assert_eq!(indexes.min(), 6);
+        let dictionary = clock::dict::Dictionary::new(&lang::Language::En);
+        let (hour, mins) = dictionary.text(0, 29);
+        assert_eq!(hour, "midnight");
+        assert_eq!(mins, "half past");
 
-        let indexes = clock::Indexes::new(1, 30);
-        assert_eq!(indexes.hour(), 1);
-        assert_eq!(indexes.min(), 6);
+        let (hour, mins) = dictionary.text(0, 30);
+        assert_eq!(hour, "midnight");
+        assert_eq!(mins, "half past");
 
-        let indexes = clock::Indexes::new(1, 31);
-        assert_eq!(indexes.hour(), 1);
-        assert_eq!(indexes.min(), 6);
+        let (hour, mins) = dictionary.text(0, 31);
+        assert_eq!(hour, "midnight");
+        assert_eq!(mins, "half past");
     }
 
 }
