@@ -1,5 +1,3 @@
-use std::u32;
-
 use super::Language;
 pub struct Dictionary<'a> {
     hours: [&'a str; 13],
@@ -22,12 +20,11 @@ impl Dictionary<'_> {
     fn get_hours_index(&self, hours: u32, mins: u32) -> usize {
         let h_ind = (hours % 12) as usize;
         match mins {
-            33..=59 => match hours {
-                11 => 12,
-                23 => 0,
-                _ => h_ind + 1
-            },
-            _ => if hours == 12 {12} else {h_ind}
+            33..=59 if hours == 11 => 12,
+			33..=59 if hours == 23 => 0,
+			33..=59 => h_ind + 1,
+            _ if hours == 12 => 12,
+            _ => h_ind
         }
     }
 
