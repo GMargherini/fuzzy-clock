@@ -1,9 +1,10 @@
 pub mod dict;
 pub mod lang;
 
+use chrono::Timelike;
+use clap::ValueEnum;
 use dict::Dictionary;
 use lang::Language;
-use chrono::Timelike;
 use std::cmp::Ordering;
 use std::fmt::{Display, Error, Formatter};
 
@@ -20,14 +21,14 @@ impl Time {
         Ok(Time {
             h: now.hour(),
             m: now.minute(),
-            lang: Language::build(lang)?,
+            lang: Language::from_str(lang, true)?,
             newline,
         })
     }
 
     fn get_time_string(&self) -> Result<String, String> {
         let dict = Dictionary::new(&self.lang);
-        
+
         let (hours, mins) = dict.text(self.h, self.m);
 
         match self.lang {

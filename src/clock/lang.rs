@@ -1,20 +1,26 @@
-#[derive(PartialEq, Debug)]
+use clap::ValueEnum;
+use std::fmt;
+
+#[derive(PartialEq, Eq, Debug, Copy, Clone, PartialOrd, ValueEnum)]
 pub enum Language {
-    It,
+    /// English
     En,
+    /// French
     Fr,
+    /// Italian
+    It,
+    /// Swedish
     Sv,
 }
 
-impl Language {
-    pub fn build(lang: &str) -> Result<Language, String> {
-        let lang = lang.to_lowercase();
-        match &lang[..] {
-            "it" => Ok(Language::It),
-            "en" => Ok(Language::En),
-            "fr" => Ok(Language::Fr),
-            "sv" => Ok(Language::Sv),
-            l => Err(format!("Language \"{l}\" not available"))
-        }
+impl fmt::Display for Language {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let lang = match self {
+            Language::En => "en",
+            Language::Fr => "fr",
+            Language::It => "it",
+            Language::Sv => "sv",
+        };
+        write!(f, "{}", lang)
     }
 }

@@ -3,13 +3,23 @@ Tells the local time with a precision of ±2.5 minutes
 
 ### Usage
 ```
-fuzzy_clock [LANGUAGE] [t]
-fuzzy_clock help
-```
-Arguments can be specified in any order
+fuzzy_clock [OPTIONS] [LANGUAGE]
 
-### Available languages
-- en: English (default)
-- fr: French
-- it: Italian
-- sv: Swedish
+Arguments:
+  [LANGUAGE]
+          Possible values:
+          - en: English
+          - fr: French
+          - it: Italian
+          - sv: Swedish
+
+Options:
+  -t, --tabulate
+          Print over two lines centering text
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+  -V, --version
+          Print version
+```

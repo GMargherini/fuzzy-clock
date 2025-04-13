@@ -1,70 +1,45 @@
 mod clock;
-use clock::Time;
+use clap::Parser;
+use clock::{Time, lang::Language};
 
+#[derive(Parser, Debug)]
+#[command(
+    version,
+    about,
+    long_about = "Tells the time with a precision of ±2.5 minutes"
+)]
 pub struct Input {
-    lang: String,
-    newline: bool
+    #[arg(value_enum)]
+    language: Option<Language>,
+    /// Print over two lines centering text
+    #[arg(short, long, default_value_t = false)]
+    tabulate: bool,
 }
-
+impl Default for Input {
+    fn default() -> Self {
+        Self::parse()
+    }
+}
 impl Input {
-    pub fn build(args: Vec<String>) -> Result<Input, String> {
-        match args.len() {
-            1 => Ok(Input {lang: "en".to_string(), newline: false}),
-            2 => Self::parse(&args[1]),
-            3 => Self::parse_two(&args[1], &args[2]),
-            _ => Err(format!("Wrong number of arguments: {}", args.len()-1))
+    pub fn lang(&self) -> String {
+        match &self.language {
+            Some(l) => l.to_string(),
+            None => "en".to_string(),
         }
     }
-
-    fn parse(arg: &str) -> Result<Input, String> {
-        match arg {
-            "t" => Ok(Input {lang: "en".to_string(), newline: true}),
-            "help" => {
-                Err("help".to_string())
-            },
-            s => Ok(Input {lang: s.to_string(), newline: false}),
-        }
+    pub fn newline(&self) -> bool {
+        self.tabulate
     }
-
-    fn parse_two(arg1: &str, arg2: &str) -> Result<Input, String> {
-        match (arg1, arg2) {
-            (s, "t") | ("t", s) => Ok(Input {lang: s.to_string(), newline: true}),
-            (_, _) => Err(format!("Unknown arguments \"{}\" \"{}\"", arg1, arg2)) 
-        }
-    }
-    pub fn lang(&self) -> &str{
-        &self.lang
-    }
-    pub fn newline(&self) -> bool{
-        self.newline
-    }
-}
-
-pub fn print_help() {
-    println!(
-"Usage:\tfuzzy_clock [LANGUAGE] [t]\n\tfuzzy_clock help
-Arguments can be specified in any order\n
-    help\t:\tprint this help message
-    t\t\t:\toutput over two lines instead of one
-\nlanguage:
-    en\t\t:\tEnglish (default)
-    fr\t\t:\tFrench
-    it\t\t:\tItalian
-    sv\t\t:\tSwedish"
-    );
 }
 
 pub fn run(input: Input) -> Result<(), String> {
-    match Time::build(input.lang(), input.newline()) {
+    match Time::build(&input.lang(), input.newline()) {
         Ok(t) => {
             println!("{}", t);
             Ok(())
-        },
-        Err(s) => {
-            Err(s)
         }
+        Err(s) => Err(s),
     }
-    
 }
 
 #[cfg(test)]
@@ -132,5 +107,4 @@ mod tests {
         assert_eq!(hour, "midnight");
         assert_eq!(mins, "half past");
     }
-
 }
