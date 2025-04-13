@@ -5,12 +5,11 @@ use clock::{Time, lang::Language};
 #[derive(Parser, Debug)]
 #[command(
     version,
-    about,
     long_about = "Tells the time with a precision of ±2.5 minutes"
 )]
 pub struct Input {
-    #[arg(value_enum)]
-    language: Option<Language>,
+    #[arg(value_enum, default_value_t=Language::En)]
+    language: Language,
     /// Print over two lines centering text
     #[arg(short, long, default_value_t = false)]
     tabulate: bool,
@@ -20,35 +19,19 @@ impl Default for Input {
         Self::parse()
     }
 }
-impl Input {
-    pub fn lang(&self) -> String {
-        match &self.language {
-            Some(l) => l.to_string(),
-            None => "en".to_string(),
-        }
-    }
-    pub fn newline(&self) -> bool {
-        self.tabulate
-    }
-}
 
-pub fn run(input: Input) -> Result<(), String> {
-    match Time::build(&input.lang(), input.newline()) {
-        Ok(t) => {
-            println!("{}", t);
-            Ok(())
-        }
-        Err(s) => Err(s),
-    }
+pub fn run(input: Input) {
+    let t = Time::new(input.language, input.tabulate);
+    println!("{}", t);
 }
 
 #[cfg(test)]
 mod tests {
     use super::clock::{self, lang};
-
+	use clap::ValueEnum;
     #[test]
     fn language_is_valid() {
-        let lang = lang::Language::build("en");
+        let lang = lang::Language::from_str("en", true);
         assert!(lang.is_ok());
         let lang = lang.unwrap();
         assert_eq!(lang, lang::Language::En);
@@ -56,7 +39,7 @@ mod tests {
 
     #[test]
     fn language_is_not_valid() {
-        let lang = lang::Language::build("zh");
+        let lang = lang::Language::from_str("zh", true);
         assert!(lang.is_err());
     }
 

@@ -2,12 +2,12 @@ pub mod dict;
 pub mod lang;
 
 use chrono::Timelike;
-use clap::ValueEnum;
 use dict::Dictionary;
 use lang::Language;
 use std::cmp::Ordering;
 use std::fmt::{Display, Error, Formatter};
 
+/// Represents the local time
 pub struct Time {
     h: u32,
     m: u32,
@@ -16,32 +16,34 @@ pub struct Time {
 }
 
 impl Time {
-    pub fn build(lang: &str, newline: bool) -> Result<Time, String> {
+    /// builds a `Time` given a language and if it needs to print over two lines
+    pub fn new(lang: Language, newline: bool) -> Time {
         let now = chrono::offset::Local::now();
-        Ok(Time {
+        Time {
             h: now.hour(),
             m: now.minute(),
-            lang: Language::from_str(lang, true)?,
+            lang,
             newline,
-        })
+        }
     }
 
-    fn get_time_string(&self) -> Result<String, String> {
+    /// returns the time in text form
+    fn get_time_string(&self) -> String {
         let dict = Dictionary::new(&self.lang);
 
         let (hours, mins) = dict.text(self.h, self.m);
 
         match self.lang {
-            Language::It | Language::Fr => Ok(self.format_text(hours, mins)),
-            Language::En | Language::Sv => Ok(self.format_text(mins, hours)),
+            Language::It | Language::Fr => self.format_text(hours, mins),
+            Language::En | Language::Sv => self.format_text(mins, hours),
         }
     }
 
+    /// formats the given text
     fn format_text(&self, first: &str, second: &str) -> String {
-        match (first, second) {
-            ("", x) | (x, "") => return x.to_string(),
-            _ => (),
-        };
+        if let ("", x) | (x, "") = (first, second) {
+            return x.to_string();
+        }
         if !self.newline {
             return format!("{} {}", first, second);
         }
@@ -62,6 +64,6 @@ impl Time {
 
 impl Display for Time {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        write!(f, "{}", self.get_time_string().unwrap())
+        write!(f, "{}", self.get_time_string())
     }
 }
