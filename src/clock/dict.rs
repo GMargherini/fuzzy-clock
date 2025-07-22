@@ -109,26 +109,6 @@ impl Dictionary<'_> {
                     "moins cinq",
                 ],
             ),
-            Language::Sv => (
-                [
-                    "midnatt", "ett", "två", "tre", "fyra", "fem", "sex", "sju", "åtta", "nio",
-                    "tio", "elva", "middag",
-                ],
-                [
-                    "",
-                    "fem över",
-                    "tio över",
-                    "kvart över",
-                    "tjugo över",
-                    "tjugofem över",
-                    "halv",
-                    "tjugofem i",
-                    "tjugo i",
-                    "kvart i",
-                    "tio i",
-                    "fem i",
-                ],
-            ),
         };
         Dictionary { hours, mins }
     }

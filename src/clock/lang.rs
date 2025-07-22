@@ -9,8 +9,6 @@ pub enum Language {
     Fr,
     /// Italian
     It,
-    /// Swedish
-    Sv,
 }
 
 impl fmt::Display for Language {
@@ -19,7 +17,6 @@ impl fmt::Display for Language {
             Language::En => "en",
             Language::Fr => "fr",
             Language::It => "it",
-            Language::Sv => "sv",
         };
         write!(f, "{}", lang)
     }

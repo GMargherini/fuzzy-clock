@@ -35,7 +35,7 @@ impl Time {
 
         match self.lang {
             Language::It | Language::Fr => self.format_text(hours, mins),
-            Language::En | Language::Sv => self.format_text(mins, hours),
+            Language::En => self.format_text(mins, hours),
         }
     }
 
