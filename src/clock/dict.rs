@@ -25,7 +25,7 @@ impl Dictionary<'_> {
         }
     }
 
-    pub fn new(lang: &Language) -> Dictionary {
+    pub fn new<'a>(lang: &Language) -> Dictionary<'a> {
         let (hours, mins) = match lang {
             Language::En => (
                 [
